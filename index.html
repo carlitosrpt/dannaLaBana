@@ -2,218 +2,485 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Juego: Atrapa a Snoopy con Mensaje Bonito y Más Rápido</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Juego de la Culebrita 🐍</title>
 <style>
-  body, html {
-    margin: 0; padding: 0; height: 100%;
-    overflow: hidden;
+  /* Reset y estilos base */
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #ffe6f0;
+    user-select: none;
+    overflow: hidden;
+  }
+
+  #game-container {
+    background: #121212;
+    border-radius: 15px;
+    box-shadow: 0 0 30px rgba(255,255,255,0.2);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  canvas {
+    display: block;
+    background: #222;
+    border-radius: 15px;
+    box-shadow:
+      inset 0 0 15px #6a11cb,
+      0 0 15px #2575fc;
+  }
+
+  #scoreboard {
+    color: #fff;
+    font-weight: bold;
+    text-align: center;
+    padding: 10px 0;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    width: 100%;
+  }
+
+  #game-over {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(30, 30, 30, 0.95);
+    color: #ff3e3e;
+    font-size: 2rem;
+    padding: 25px 40px;
+    border-radius: 20px;
+    text-align: center;
+    display: none;
+    box-shadow: 0 0 20px #ff3e3e;
+    animation: pulse 1.5s infinite;
+    z-index: 10;
+  }
+
+  #restart-btn {
+    margin-top: 15px;
+    background: #6a11cb;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 12px;
+    font-size: 1rem;
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 0 12px #6a11cb;
+    transition: background-color 0.3s ease;
+  }
+
+  #restart-btn:hover {
+    background: #2575fc;
+    box-shadow: 0 0 18px #2575fc;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      text-shadow: 0 0 10px #ff3e3e, 0 0 20px #ff3e3e;
+    }
+    50% {
+      text-shadow: 0 0 20px #ff7a7a, 0 0 30px #ff7a7a;
+    }
+  }
+
+  /* Controles táctiles */
+  #touch-controls {
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+    user-select: none;
+  }
+
+  .btn-control {
+    width: 60px;
+    height: 60px;
+    margin: 0 10px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
     display: flex;
     justify-content: center;
     align-items: center;
-    position: relative;
-  }
-  #game-container {
-    position: relative;
-    width: 600px;
-    height: 400px;
-    border-radius: 20px;
-    background: #ffcee4;
-    box-shadow: 0 0 20px #ff8fb1;
-    overflow: hidden;
-  }
-  .heart {
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    background: #ff5370;
-    clip-path: polygon(50% 0%, 61% 15%, 75% 15%, 85% 25%, 85% 50%, 50% 90%, 15% 50%, 15% 25%, 25% 15%, 39% 15%);
-    animation: floatUp linear infinite;
-    opacity: 0.7;
-  }
-  @keyframes floatUp {
-    0% { transform: translateY(100%); opacity: 0.7; }
-    100% { transform: translateY(-120%); opacity: 0; }
-  }
-
-  #snoopy {
-    position: absolute;
-    width: 100px;
-    height: 100px;
     cursor: pointer;
-    user-select: none;
-    transition: none;
+    transition: background-color 0.2s ease, transform 0.1s ease;
   }
 
-  #score {
-    position: absolute;
-    top: 10px;
-    left: 15px;
-    font-size: 24px;
-    color: #9a004c;
-    font-weight: bold;
-    text-shadow: 1px 1px 2px #fff;
+  .btn-control:active {
+    background-color: rgba(255, 255, 255, 0.35);
+    transform: scale(0.9);
+    box-shadow: 0 0 20px #fff;
   }
 
-  /* Estilos para el modal */
-  #message-modal {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    background: #fff0f6;
-    border: 3px solid #ff6f91;
-    border-radius: 15px;
-    padding: 25px 40px;
-    box-shadow: 0 4px 15px rgba(255, 111, 145, 0.7);
-    text-align: center;
-    color: #9a004c;
-    font-size: 20px;
-    font-weight: 600;
-    display: none;
-    z-index: 10;
-    animation: fadeInScale 0.4s ease forwards;
+  /* Flechas con CSS */
+  .arrow {
+    border: solid white;
+    border-width: 0 5px 5px 0;
+    display: inline-block;
+    padding: 10px;
   }
 
-  @keyframes fadeInScale {
-    0% {
-      opacity: 0;
-      transform: translate(-50%, -50%) scale(0.8);
-    }
-    100% {
-      opacity: 1;
-      transform: translate(-50%, -50%) scale(1);
-    }
+  .up {
+    transform: rotate(-135deg);
+    -webkit-transform: rotate(-135deg);
   }
 
-  #close-btn {
+  .down {
+    transform: rotate(45deg);
+    -webkit-transform: rotate(45deg);
+  }
+
+  .left {
+    transform: rotate(135deg);
+    -webkit-transform: rotate(135deg);
+  }
+
+  .right {
+    transform: rotate(-45deg);
+    -webkit-transform: rotate(-45deg);
+  }
+
+  /* Layout controles en forma de cruz */
+  #touch-controls {
+    width: 220px;
+    flex-wrap: wrap;
+    max-width: 100vw;
+  }
+  #btn-up {
+    margin: 0 auto 10px auto;
+  }
+  #btn-left {
+    margin-right: 30px;
+  }
+  #btn-right {
+    margin-left: 30px;
+  }
+  #btn-down {
+    margin: 10px auto 0 auto;
+  }
+
+  /* Imagen game over */
+  #game-over img {
+    max-width: 250px;
     margin-top: 15px;
-    background: #ff6f91;
-    border: none;
-    border-radius: 10px;
-    padding: 8px 18px;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  #close-btn:hover {
-    background: #d04b64;
-  }
-
-  /* Responsivo para celulares */
-  @media (max-width: 650px) {
-    #game-container {
-      width: 90vw;
-      height: 60vw;
-      max-height: 400px;
-    }
-
-    #snoopy {
-      width: 15vw;
-      height: 15vw;
-    }
-
-    #score {
-      font-size: 18px;
-      left: 10px;
-      top: 8px;
-    }
-
-    #message-modal {
-      width: 80vw;
-      padding: 20px;
-      font-size: 18px;
-    }
-
-    #close-btn {
-      padding: 7px 15px;
-    }
+    border-radius: 15px;
+    box-shadow: 0 0 20px #ff3e3e;
   }
 </style>
 </head>
 <body>
   <div id="game-container">
-    <div id="score">Puntos: 0</div>
-    <img id="snoopy" src="https://i.pinimg.com/originals/69/01/ac/6901ac295e93c85f88c1c5d6bd6cb54e.png" alt="Snoopy" />
-
-    <!-- Modal mensaje -->
-    <div id="message-modal">
-      joa mani fuiste rapidaaaaa, felicitaciones por atrapar a queso pera se gano un besito mi princesa bella, hermosa, preciosa, divina, cosita bien echa . 💖🌟
-      <br />
-      <button id="close-btn">Cerrar</button>
+    <div id="scoreboard">Puntaje: 0</div>
+    <canvas id="game" width="480" height="480"></canvas>
+    <div id="game-over">
+      Juego terminado<br />
+      <img src="/danna.jpg" alt="Game Over" />
+      <button id="restart-btn">Volver a jugar</button>
+    </div>
+    <div id="touch-controls">
+      <div id="btn-up" class="btn-control" aria-label="Arriba"><i class="arrow up"></i></div>
+      <div id="btn-left" class="btn-control" aria-label="Izquierda"><i class="arrow left"></i></div>
+      <div id="btn-right" class="btn-control" aria-label="Derecha"><i class="arrow right"></i></div>
+      <div id="btn-down" class="btn-control" aria-label="Abajo"><i class="arrow down"></i></div>
     </div>
   </div>
 
 <script>
-  const gameContainer = document.getElementById('game-container');
-  const snoopy = document.getElementById('snoopy');
-  const scoreDisplay = document.getElementById('score');
-  const messageModal = document.getElementById('message-modal');
-  const closeBtn = document.getElementById('close-btn');
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const scoreboard = document.getElementById('scoreboard');
+  const gameOverDiv = document.getElementById('game-over');
+  const restartBtn = document.getElementById('restart-btn');
 
-  let score = 0;
-  const containerWidth = gameContainer.clientWidth;
-  const containerHeight = gameContainer.clientHeight;
+  const btnUp = document.getElementById('btn-up');
+  const btnDown = document.getElementById('btn-down');
+  const btnLeft = document.getElementById('btn-left');
+  const btnRight = document.getElementById('btn-right');
 
-  const snoopyImages = [
-    "https://i.pinimg.com/originals/69/01/ac/6901ac295e93c85f88c1c5d6bd6cb54e.png",
-    "https://upload.wikimedia.org/wikipedia/en/d/db/Woodstock.png",
-    "https://www.applystickers.com/cdn/shop/files/Single_Peanuts_Holo_Heart_Snoopy_Flat.png?v=1750873342"
+  const gridSize = 20; // tamaño de cada celda
+  const tileCount = canvas.width / gridSize;
+
+  let snake = [
+    { x: 9, y: 9 },
+    { x: 8, y: 9 },
+    { x: 7, y: 9 },
   ];
 
-  function getRandomPosition() {
-    const x = Math.floor(Math.random() * (containerWidth - snoopy.clientWidth));
-    const y = Math.floor(Math.random() * (containerHeight - snoopy.clientHeight));
-    return { x, y };
+  let velocity = { x: 1, y: 0 };
+  let nextVelocity = { x: 1, y: 0 };
+
+  let apple = { x: 0, y: 0 };
+
+  let score = 0;
+  let gameRunning = true;
+
+  // Colores para la culebra con un gradiente
+  const snakeGradientColors = ['#6a11cb', '#2575fc'];
+
+  // Genera la posición aleatoria para la manzana
+  function randomApple() {
+    let newApple;
+    while (true) {
+      newApple = {
+        x: Math.floor(Math.random() * tileCount),
+        y: Math.floor(Math.random() * tileCount),
+      };
+      // Evitar que la manzana aparezca sobre la culebra
+      if (!snake.some(segment => segment.x === newApple.x && segment.y === newApple.y)) break;
+    }
+    apple = newApple;
   }
 
-  function getRandomImage() {
-    const idx = Math.floor(Math.random() * snoopyImages.length);
-    return snoopyImages[idx];
+  // Dibuja un rectángulo con bordes redondeados
+  function drawRoundedRect(x, y, width, height, radius, fillStyle) {
+    ctx.fillStyle = fillStyle;
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+    ctx.fill();
   }
 
-  function moveSnoopy() {
-    const pos = getRandomPosition();
-    snoopy.style.left = pos.x + 'px';
-    snoopy.style.top = pos.y + 'px';
-    snoopy.src = getRandomImage();
+  // Dibuja la culebra con un efecto de gradiente en cada segmento
+  function drawSnake() {
+    for (let i = 0; i < snake.length; i++) {
+      // Gradiente entre dos colores basado en el índice del segmento
+      let t = i / snake.length;
+      let r = lerp(hexToRgb(snakeGradientColors[0]).r, hexToRgb(snakeGradientColors[1]).r, t);
+      let g = lerp(hexToRgb(snakeGradientColors[0]).g, hexToRgb(snakeGradientColors[1]).g, t);
+      let b = lerp(hexToRgb(snakeGradientColors[0]).b, hexToRgb(snakeGradientColors[1]).b, t);
+
+      let color = `rgb(${r}, ${g}, ${b})`;
+      // Dibujo con bordes redondeados
+      drawRoundedRect(snake[i].x * gridSize, snake[i].y * gridSize, gridSize, gridSize, 5, color);
+    }
   }
 
-  let moveInterval = setInterval(moveSnoopy, 200);
-  moveSnoopy();
+  // Función para interpolar linealmente
+  function lerp(a, b, t) {
+    return Math.round(a + (b - a) * t);
+  }
 
-  snoopy.addEventListener('click', () => {
-    score++;
-    scoreDisplay.textContent = 'Puntos: ' + score;
-    moveSnoopy();
+  // Convierte un color hexadecimal a RGB
+  function hexToRgb(hex) {
+    const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+    hex = hex.replace(shorthandRegex, (m, r, g, b) => r + r + g + g + b + b);
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+    } : null;
+  }
 
-    if(score === 5) {
-      clearInterval(moveInterval);
-      messageModal.style.display = 'block';
+  // Dibuja la manzana con una animación de brillo
+  function drawApple(time) {
+    const pulse = 0.15 * Math.sin(time / 200) + 0.85; // oscila entre 0.7 y 1
+    const gradient = ctx.createRadialGradient(
+      apple.x * gridSize + gridSize / 2,
+      apple.y * gridSize + gridSize / 2,
+      gridSize / 4,
+      apple.x * gridSize + gridSize / 2,
+      apple.y * gridSize + gridSize / 2,
+      gridSize / 2
+    );
+    gradient.addColorStop(0, `rgba(255, 59, 48, ${pulse})`);
+    gradient.addColorStop(1, 'rgba(255, 59, 48, 0)');
+
+    // Círculo principal (manzana)
+    drawRoundedRect(apple.x * gridSize, apple.y * gridSize, gridSize, gridSize, 7, '#ff3b30');
+
+    // Brillo animado
+    ctx.fillStyle = gradient;
+    ctx.fillRect(apple.x * gridSize, apple.y * gridSize, gridSize, gridSize);
+  }
+
+  // Limpia el canvas
+  function clear() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+
+  // Actualiza la lógica del juego
+  function update() {
+    if (!gameRunning) return;
+
+    // Actualiza la dirección
+    velocity = nextVelocity;
+
+    // Calcula la nueva cabeza de la serpiente
+    const head = {
+      x: snake[0].x + velocity.x,
+      y: snake[0].y + velocity.y,
+    };
+
+    // Verifica choque con paredes (sin wrap)
+    if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) {
+      gameOver();
+      return;
+    }
+
+    // Revisa colisión con el cuerpo
+    if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+      gameOver();
+      return;
+    }
+
+    // Añade la cabeza al frente de la culebra
+    snake.unshift(head);
+
+    // Si la serpiente come la manzana
+    if (head.x === apple.x && head.y === apple.y) {
+      score++;
+      scoreboard.textContent = `Puntaje: ${score}`;
+      randomApple();
+    } else {
+      // Si no come, quita el último segmento
+      snake.pop();
+    }
+  }
+
+  // Renderiza el juego
+  function draw(time) {
+    clear();
+    drawSnake();
+    drawApple(time);
+  }
+
+  // Función principal del juego: update + draw
+  function gameLoop(timestamp = 0) {
+    update();
+    draw(timestamp);
+    if (gameRunning) {
+      setTimeout(() => requestAnimationFrame(gameLoop), 100); // velocidad fija 100ms por frame (10fps)
+    }
+  }
+
+  // Controla las teclas para cambiar dirección
+  window.addEventListener('keydown', e => {
+    switch (e.key) {
+      case 'ArrowUp':
+      case 'w':
+      case 'W':
+        if (velocity.y === 0) nextVelocity = { x: 0, y: -1 };
+        break;
+      case 'ArrowDown':
+      case 's':
+      case 'S':
+        if (velocity.y === 0) nextVelocity = { x: 0, y: 1 };
+        break;
+      case 'ArrowLeft':
+      case 'a':
+      case 'A':
+        if (velocity.x === 0) nextVelocity = { x: -1, y: 0 };
+        break;
+      case 'ArrowRight':
+      case 'd':
+      case 'D':
+        if (velocity.x === 0) nextVelocity = { x: 1, y: 0 };
+        break;
     }
   });
 
-  closeBtn.addEventListener('click', () => {
-    messageModal.style.display = 'none';
-    moveInterval = setInterval(moveSnoopy, 200);
-  });
-
-  function createHeart() {
-    const heart = document.createElement('div');
-    heart.classList.add('heart');
-    heart.style.left = Math.random() * containerWidth + 'px';
-    heart.style.animationDuration = (4 + Math.random() * 3) + 's';
-    heart.style.width = (10 + Math.random() * 20) + 'px';
-    heart.style.height = heart.style.width;
-    gameContainer.appendChild(heart);
-    setTimeout(() => {
-      heart.remove();
-    }, 7000);
+  // Control táctil para los botones
+  function setDirection(dir) {
+    if (!gameRunning) return;
+    switch (dir) {
+      case 'up':
+        if (velocity.y === 0) nextVelocity = { x: 0, y: -1 };
+        break;
+      case 'down':
+        if (velocity.y === 0) nextVelocity = { x: 0, y: 1 };
+        break;
+      case 'left':
+        if (velocity.x === 0) nextVelocity = { x: -1, y: 0 };
+        break;
+      case 'right':
+        if (velocity.x === 0) nextVelocity = { x: 1, y: 0 };
+        break;
+    }
   }
 
-  setInterval(createHeart, 300);
+  btnUp.addEventListener('touchstart', e => {
+    e.preventDefault();
+    setDirection('up');
+  });
+  btnDown.addEventListener('touchstart', e => {
+    e.preventDefault();
+    setDirection('down');
+  });
+  btnLeft.addEventListener('touchstart', e => {
+    e.preventDefault();
+    setDirection('left');
+  });
+  btnRight.addEventListener('touchstart', e => {
+    e.preventDefault();
+    setDirection('right');
+  });
+
+  // También soporta click para desktop
+  btnUp.addEventListener('mousedown', e => {
+    e.preventDefault();
+    setDirection('up');
+  });
+  btnDown.addEventListener('mousedown', e => {
+    e.preventDefault();
+    setDirection('down');
+  });
+  btnLeft.addEventListener('mousedown', e => {
+    e.preventDefault();
+    setDirection('left');
+  });
+  btnRight.addEventListener('mousedown', e => {
+    e.preventDefault();
+    setDirection('right');
+  });
+
+  // Cuando termina el juego
+  function gameOver() {
+    gameRunning = false;
+    gameOverDiv.style.display = 'block';
+  }
+
+  // Reiniciar juego
+  restartBtn.addEventListener('click', () => {
+    snake = [
+      { x: 9, y: 9 },
+      { x: 8, y: 9 },
+      { x: 7, y: 9 },
+    ];
+    velocity = { x: 1, y: 0 };
+    nextVelocity = { x: 1, y: 0 };
+    score = 0;
+    scoreboard.textContent = `Puntaje: ${score}`;
+    randomApple();
+    gameOverDiv.style.display = 'none';
+    gameRunning = true;
+    gameLoop();
+  });
+
+  // Inicialización
+  randomApple();
+  gameLoop();
+
 </script>
 </body>
 </html>
