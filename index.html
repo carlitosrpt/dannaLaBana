@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Juego: Atrapa a Snoopy con Mensaje Bonito</title>
+<style>
+  body, html {
+    margin: 0; padding: 0; height: 100%;
+    overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #ffe6f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+  }
+  #game-container {
+    position: relative;
+    width: 600px;
+    height: 400px;
+    border-radius: 20px;
+    background: #ffcee4;
+    box-shadow: 0 0 20px #ff8fb1;
+    overflow: hidden;
+  }
+  .heart {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: #ff5370;
+    clip-path: polygon(50% 0%, 61% 15%, 75% 15%, 85% 25%, 85% 50%, 50% 90%, 15% 50%, 15% 25%, 25% 15%, 39% 15%);
+    animation: floatUp linear infinite;
+    opacity: 0.7;
+  }
+  @keyframes floatUp {
+    0% { transform: translateY(100%); opacity: 0.7; }
+    100% { transform: translateY(-120%); opacity: 0; }
+  }
+
+  #snoopy {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    cursor: pointer;
+    user-select: none;
+    transition: none;
+  }
+
+  #score {
+    position: absolute;
+    top: 10px;
+    left: 15px;
+    font-size: 24px;
+    color: #9a004c;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px #fff;
+  }
+
+  /* Estilos para el modal */
+  #message-modal {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff0f6;
+    border: 3px solid #ff6f91;
+    border-radius: 15px;
+    padding: 25px 40px;
+    box-shadow: 0 4px 15px rgba(255, 111, 145, 0.7);
+    text-align: center;
+    color: #9a004c;
+    font-size: 20px;
+    font-weight: 600;
+    display: none;
+    z-index: 10;
+    animation: fadeInScale 0.4s ease forwards;
+  }
+
+  @keyframes fadeInScale {
+    0% {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.8);
+    }
+    100% {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+  }
+
+  #close-btn {
+    margin-top: 15px;
+    background: #ff6f91;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 18px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  #close-btn:hover {
+    background: #d04b64;
+  }
+  /* Al final de tu CSS actual, agrega: */
+
+@media (max-width: 650px) {
+  #game-container {
+    width: 90vw;      /* 90% del ancho de la pantalla */
+    height: 60vw;     /* altura proporcional */
+    max-height: 400px;
+  }
+
+  #snoopy {
+    width: 15vw;      /* tamaño proporcional para celular */
+    height: 15vw;
+  }
+
+  #score {
+    font-size: 18px;
+    left: 10px;
+    top: 8px;
+  }
+
+  #message-modal {
+    width: 80vw;
+    padding: 20px;
+    font-size: 18px;
+  }
+
+  #close-btn {
+    padding: 7px 15px;
+  }
+}
+
+</style>
+</head>
+<body>
+  <div id="game-container">
+    <div id="score">Puntos: 0</div>
+    <img id="snoopy" src="https://i.pinimg.com/originals/69/01/ac/6901ac295e93c85f88c1c5d6bd6cb54e.png" alt="Snoopy" />
+
+    <!-- Modal mensaje -->
+    <div id="message-modal">
+      joa mani fuiste rapidaaaaa, felicitaciones por atrapar a queso pera se gano un besito mi princesa bella, hermosa, preciosa, divina, cosita bien echa . 💖🌟
+      <br />
+      <button id="close-btn">Cerrar</button>
+    </div>
+  </div>
+
+<script>
+  const gameContainer = document.getElementById('game-container');
+  const snoopy = document.getElementById('snoopy');
+  const scoreDisplay = document.getElementById('score');
+  const messageModal = document.getElementById('message-modal');
+  const closeBtn = document.getElementById('close-btn');
+
+  let score = 0;
+  const containerWidth = gameContainer.clientWidth;
+  const containerHeight = gameContainer.clientHeight;
+
+  const snoopyImages = [
+    "https://i.pinimg.com/originals/69/01/ac/6901ac295e93c85f88c1c5d6bd6cb54e.png",
+    "https://upload.wikimedia.org/wikipedia/en/d/db/Woodstock.png",
+    "https://www.applystickers.com/cdn/shop/files/Single_Peanuts_Holo_Heart_Snoopy_Flat.png?v=1750873342"
+  ];
+
+  function getRandomPosition() {
+    const x = Math.floor(Math.random() * (containerWidth - snoopy.clientWidth));
+    const y = Math.floor(Math.random() * (containerHeight - snoopy.clientHeight));
+    return { x, y };
+  }
+
+  function getRandomImage() {
+    const idx = Math.floor(Math.random() * snoopyImages.length);
+    return snoopyImages[idx];
+  }
+
+  function moveSnoopy() {
+    const pos = getRandomPosition();
+    snoopy.style.left = pos.x + 'px';
+    snoopy.style.top = pos.y + 'px';
+    snoopy.src = getRandomImage();
+  }
+
+  let moveInterval = setInterval(moveSnoopy, 400);
+  moveSnoopy();
+
+  snoopy.addEventListener('click', () => {
+    score++;
+    scoreDisplay.textContent = 'Puntos: ' + score;
+    moveSnoopy();
+
+    if(score === 5) {
+      clearInterval(moveInterval); // pausa el movimiento mientras se muestra el mensaje
+      messageModal.style.display = 'block';
+    }
+  });
+
+  closeBtn.addEventListener('click', () => {
+    messageModal.style.display = 'none';
+    moveInterval = setInterval(moveSnoopy, 400); // vuelve a activar el movimiento
+  });
+
+  function createHeart() {
+    const heart = document.createElement('div');
+    heart.classList.add('heart');
+    heart.style.left = Math.random() * containerWidth + 'px';
+    heart.style.animationDuration = (4 + Math.random() * 3) + 's';
+    heart.style.width = (10 + Math.random() * 20) + 'px';
+    heart.style.height = heart.style.width;
+    gameContainer.appendChild(heart);
+    setTimeout(() => {
+      heart.remove();
+    }, 7000);
+  }
+
+  setInterval(createHeart, 300);
+</script>
+</body>
+</html>
