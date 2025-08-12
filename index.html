@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Juego: Atrapa a Snoopy con Mensaje Bonito</title>
+<title>Juego: Atrapa a Snoopy con Mensaje Bonito y Más Rápido</title>
 <style>
   body, html {
     margin: 0; padding: 0; height: 100%;
@@ -101,37 +101,36 @@
   #close-btn:hover {
     background: #d04b64;
   }
-  /* Al final de tu CSS actual, agrega: */
 
-@media (max-width: 650px) {
-  #game-container {
-    width: 90vw;      /* 90% del ancho de la pantalla */
-    height: 60vw;     /* altura proporcional */
-    max-height: 400px;
+  /* Responsivo para celulares */
+  @media (max-width: 650px) {
+    #game-container {
+      width: 90vw;
+      height: 60vw;
+      max-height: 400px;
+    }
+
+    #snoopy {
+      width: 15vw;
+      height: 15vw;
+    }
+
+    #score {
+      font-size: 18px;
+      left: 10px;
+      top: 8px;
+    }
+
+    #message-modal {
+      width: 80vw;
+      padding: 20px;
+      font-size: 18px;
+    }
+
+    #close-btn {
+      padding: 7px 15px;
+    }
   }
-
-  #snoopy {
-    width: 15vw;      /* tamaño proporcional para celular */
-    height: 15vw;
-  }
-
-  #score {
-    font-size: 18px;
-    left: 10px;
-    top: 8px;
-  }
-
-  #message-modal {
-    width: 80vw;
-    padding: 20px;
-    font-size: 18px;
-  }
-
-  #close-btn {
-    padding: 7px 15px;
-  }
-}
-
 </style>
 </head>
 <body>
@@ -182,7 +181,7 @@
     snoopy.src = getRandomImage();
   }
 
-  let moveInterval = setInterval(moveSnoopy, 400);
+  let moveInterval = setInterval(moveSnoopy, 200);
   moveSnoopy();
 
   snoopy.addEventListener('click', () => {
@@ -191,14 +190,14 @@
     moveSnoopy();
 
     if(score === 5) {
-      clearInterval(moveInterval); // pausa el movimiento mientras se muestra el mensaje
+      clearInterval(moveInterval);
       messageModal.style.display = 'block';
     }
   });
 
   closeBtn.addEventListener('click', () => {
     messageModal.style.display = 'none';
-    moveInterval = setInterval(moveSnoopy, 400); // vuelve a activar el movimiento
+    moveInterval = setInterval(moveSnoopy, 200);
   });
 
   function createHeart() {
